@@ -1,4 +1,9 @@
 CGAT
+Cheung
 CUDA
+fatbin
+fcoroutines
 JENGINE
+LINKERFLAG
+NVCC
 STREQUAL
