@@ -1,0 +1,36 @@
+set(MODULE_NAME CDT_Core)
+
+message(STATUS "Adding library: ${MODULE_NAME} ...")
+
+file(GLOB_RECURSE ${MODULE_NAME}_HEADERS *.h*)
+file(GLOB_RECURSE ${MODULE_NAME}_SOURCES *.c*)
+
+if(enable_verbose)
+    message(STATUS "    ${MODULE_NAME}_HEADERS is: ${${MODULE_NAME}_HEADERS}")
+    message(STATUS "    ${MODULE_NAME}_SOURCES is: ${${MODULE_NAME}_SOURCES}")
+endif(enable_verbose)
+
+SET(${MODULE_NAME}_FILES ${${MODULE_NAME}_HEADERS} ${${MODULE_NAME}_SOURCES})
+
+add_library(${MODULE_NAME} SHARED ${${MODULE_NAME}_FILES})
+
+target_compile_definitions(${MODULE_NAME} PRIVATE "CDT_API_COMPILE")
+
+target_include_directories(${MODULE_NAME} PUBLIC
+    ${CMAKE_BINARY_DIR}/src/cdt_core
+)
+
+set_target_properties(${MODULE_NAME} PROPERTIES CXX_STANDARD ${CDT_CXX_STD})
+set_target_properties(${MODULE_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON)
+set_target_properties(${MODULE_NAME} PROPERTIES VERSION ${CDT_VERSION})
+
+target_compile_options(${MODULE_NAME} PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:${CDT_CXX_FLAGS}>
+    $<$<COMPILE_LANGUAGE:CUDA>:${CDT_NVCC_FLAGS}>
+)
+
+# Install the library
+install(TARGETS ${MODULE_NAME}
+    RUNTIME DESTINATION ${CDT_RUNTIME_INSTALL_DIR}
+    LIBRARY DESTINATION ${CDT_LIBRARY_INSTALL_DIR}
+    ARCHIVE DESTINATION ${CDT_ARCHIVE_INSTALL_DIR})

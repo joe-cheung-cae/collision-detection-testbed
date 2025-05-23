@@ -1,0 +1,106 @@
+//
+//   ██████╗ ██████╗  ████████╗
+//  ██╔════╝ ██╔══██╗ ╚══██╔══╝
+//  ██║      ██║  ██║    ██║
+//  ██║      ██║  ██║    ██║
+//  ╚██████╗ ██████╔╝    ██║
+//   ╚═════╝ ╚═════╝     ╚═╝
+//
+
+#pragma once
+
+// clang-format off
+
+// Set the string value of version information
+#define CDT_VERSION       "@CDT_VERSION@"
+#define CDT_VERSION_MAJOR "@CDT_VERSION_MAJOR@"
+#define CDT_VERSION_MINOR "@CDT_VERSION_MINOR@"
+#define CDT_VERSION_PATCH "@CDT_VERSION_PATCH@"
+
+// Set the building time
+#define CDT_BUILD_TIMESTAMP "@CDT_BUILD_TIMESTAMP@"
+
+// Set the Git information
+#define CDT_GIT_HASH   "@CDT_GIT_HASH@"
+#define CDT_GIT_BRANCH "@CDT_GIT_BRANCH@"
+
+// Set the data file path of CDT
+#define CDT_DATA_DIR "@CDT_DATA_DIR@"
+
+// Verbose definition
+#cmakedefine CDT_VERBOSE
+
+// Precision definition
+#cmakedefine CDT_DP
+
+// clang-format on
+
+// Functionality for API import/export symbols, in a platform independent way.
+// When building the DLL, use the CDTApiEXPORT macro. When using the DLL, use the CDTApiIMPORT macro.
+#if ((defined _WIN32) || (defined(__MINGW32__) || defined(__CYGWIN__))) && !defined(CDT_STATIC)
+    #define CDTApiEXPORT __declspec(dllexport)
+    #define CDTApiIMPORT __declspec(dllimport)
+#else
+    #define CDTApiEXPORT
+    #define CDTApiIMPORT
+#endif
+
+#if defined(CDT_API_COMPILE)
+    #define CDTApi CDTApiEXPORT
+#else
+    #define CDTApi CDTApiIMPORT
+#endif
+
+namespace cdt {
+
+/// @brief Definition depend on operation system
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64)
+typedef unsigned int   uint;
+typedef unsigned short ushort;
+#endif
+
+/// @brief Device inline
+#if defined(__CUDACC__) || defined(__HIPCC__)
+    #define DEVICE_INLINE __forceinline__
+#else
+    #define DEVICE_INLINE
+#endif
+
+/// @brief Host device inline
+#if defined(__CUDACC__) || defined(__HIPCC__)
+    #define HOST_DEVICE_INLINE __forceinline__
+#else
+    #define HOST_DEVICE_INLINE inline
+#endif
+
+/// @brief Cuda callable
+#if defined(__CUDACC__) || defined(__HIPCC__)
+    #define HOST_DEVICE_FUN __host__ __device__
+    #define HOST_FUN __host__
+    #define DEVICE_FUN __device__
+#else
+    #define HOST_DEVICE_FUN
+    #define HOST_FUN
+    #define DEVICE_FUN
+#endif
+
+/// @brief Alias for HOST_DEVICE_FUN and HOST_DEVICE_INLINE
+#define HD_QUALIFIER HOST_DEVICE_FUN HOST_DEVICE_INLINE
+
+// if-constexpr statement
+#ifdef __cpp_if_constexpr
+    #define IF_CONSTEXPR if constexpr
+    #define ELSE_IF_CONSTEXPR else if constexpr
+#else
+    #define IF_CONSTEXPR if
+    #define ELSE_IF_CONSTEXPR else if
+#endif
+
+/// @brief Enumeration for device policy
+enum DeviceType {
+    CPU       = 0,  // CPU running
+    GPU       = 1,  // Device running
+    UNDEFINED = 2,  // Undefined behavior
+};
+
+}  // namespace cdt

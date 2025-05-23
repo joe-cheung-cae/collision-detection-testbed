@@ -3,6 +3,7 @@ Cheung
 CUDA
 fatbin
 fcoroutines
+HIPCC
 JENGINE
 LINKERFLAG
 NVCC

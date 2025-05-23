@@ -59,6 +59,8 @@ message(STATUS "    The target processor is ${CMAKE_SYSTEM_PROCESSOR}")
 # ==================================================================================
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build.")
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release)
+option(enable_verbose "Enable verbose for building process." ON)
+option(enable_double "Enable double precision." ON)
 
 # Print the build type
 message(STATUS "Build information:")
@@ -89,3 +91,100 @@ include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 # Print the CUDA toolkit information
 message(STATUS "    CUDA Compiler Version:                  ${CMAKE_CUDA_COMPILER_VERSION}")
 message(STATUS "    CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES: ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}")
+
+# ==================================================================================
+# Miscellaneous configuration for cmake utility
+# ==================================================================================
+
+# Set debug postfix
+set(CMAKE_DEBUG_POSTFIX "-dgb")
+
+# Set the precision
+if(enable_double)
+    set(CDT_DP ON)
+else()
+    set(CDT_DP OFF)
+endif()
+
+# Enable verbose printing
+if(enable_verbose)
+    set(CDT_VERBOSE ON)
+    get_directory_property(my_import_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} IMPORTED_TARGETS)
+    message(STATUS "my_import_targets=${my_import_targets}")
+else()
+    set(CDT_VERBOSE OFF)
+endif()
+
+# Export compile command
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
+
+# Position independent code
+set(POSITION_INDEPENDENT_CODE TRUE)
+
+# ==================================================================================
+# Print the compiler and linker flags
+# ==================================================================================
+message(STATUS "Compiler and linker flags: ")
+message(STATUS "    CDT_CXX_FLAGS is:      ${CDT_CXX_FLAGS}")
+message(STATUS "    CDT_NVCC_FLAGS is:     ${CDT_NVCC_FLAGS}")
+message(STATUS "    CDT_LINKERFLAG_LIB is: ${CDT_LINKERFLAG_LIB}")
+message(STATUS "    CDT_LINKERFLAG_EXE is: ${CDT_LINKERFLAG_EXE}")
+
+# ==================================================================================
+# Export the definition of JEngine
+# ==================================================================================
+include(cdt_config)
+
+# ==================================================================================
+# Directories of output and installation
+# ==================================================================================
+
+# set output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
+
+message(STATUS "The directories of CMake output: ")
+message(STATUS "    CMAKE_ARCHIVE_OUTPUT_DIRECTORY is: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+message(STATUS "    CMAKE_LIBRARY_OUTPUT_DIRECTORY is: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+message(STATUS "    CMAKE_RUNTIME_OUTPUT_DIRECTORY is: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+
+# Installation destinations
+if(UNIX)
+    include(GNUInstallDirs)
+
+    set(CDT_INC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/CDT/include")
+    set(CDT_RUNTIME_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/CDT/bin")
+    set(CDT_LIBRARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/CDT/lib")
+    set(CDT_ARCHIVE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/CDT/lib")
+    set(CDT_FRAMEWORK_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/CDT/bin")
+
+    set(CDT_CMAKE_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/CDT/cmake")
+    set(CDT_ADDITIONAL_FILES_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/CDT")
+
+elseif(WIN32)
+    set(CDT_INC_INSTALL_DIR "include/CDT")
+    set(CDT_RUNTIME_INSTALL_DIR "bin")
+    set(CDT_LIBRARY_INSTALL_DIR "bin")
+    set(CDT_ARCHIVE_INSTALL_DIR "lib")
+    set(CDT_FRAMEWORK_INSTALL_DIR "bin")
+
+    set(CDT_CMAKE_CONFIG_INSTALL_DIR "share/CDT/cmake")
+    set(CDT_ADDITIONAL_FILES_INSTALL_DIR "share/CDT")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+else()
+    message(FATAL_ERROR "Could not set install folders for this platform!")
+endif()
+
+message(STATUS "The directories of installation: ")
+message(STATUS "    CDT_INC_INSTALL_DIR is              : ${CDT_INC_INSTALL_DIR}")
+message(STATUS "    CDT_RUNTIME_INSTALL_DIR is          : ${CDT_RUNTIME_INSTALL_DIR}")
+message(STATUS "    CDT_LIBRARY_INSTALL_DIR is          : ${CDT_LIBRARY_INSTALL_DIR}")
+message(STATUS "    CDT_ARCHIVE_INSTALL_DIR is          : ${CDT_ARCHIVE_INSTALL_DIR}")
+message(STATUS "    CDT_FRAMEWORK_INSTALL_DIR is        : ${CDT_FRAMEWORK_INSTALL_DIR}")
+message(STATUS "    CDT_CMAKE_CONFIG_INSTALL_DIR is     : ${CDT_CMAKE_CONFIG_INSTALL_DIR}")
+message(STATUS "    CDT_ADDITIONAL_FILES_INSTALL_DIR is : ${CDT_ADDITIONAL_FILES_INSTALL_DIR}")
+
+# Add the src directory
+add_subdirectory(src)
