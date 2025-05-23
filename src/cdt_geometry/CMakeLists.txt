@@ -18,6 +18,7 @@ target_compile_definitions(${MODULE_NAME} PRIVATE "CDT_API_COMPILE")
 
 target_include_directories(${MODULE_NAME} PUBLIC
     ${CMAKE_BINARY_DIR}/src/cdt_core
+    ${CMAKE_SOURCE_DIR}/src
 )
 
 set_target_properties(${MODULE_NAME} PROPERTIES CXX_STANDARD ${CDT_CXX_STD})
